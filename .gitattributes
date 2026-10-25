@@ -1,0 +1,20 @@
+# Normalise line endings across Windows / macOS / Linux team members
+* text=auto eol=lf
+
+# Windows scripts must keep CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binary assets
+*.jar binary
+*.war binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.xlsx binary
+*.docx binary
+
+# Generated files
+target/** linguist-generated=true
