@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-// Edit/Delete/Add සිදුකරන සියලුම URL Routes මෙහි ඇතුළත් කර ඇත
 @WebFilter(urlPatterns = {
         "/edit-patient",
         "/delete-patient",
@@ -39,11 +38,10 @@ public class AdminAuthFilter implements Filter {
 
         User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
 
-        // පරිශීලකයා ADMIN නොවේ නම් (DOCTOR නම්) Access Block කිරීම
         if (currentUser == null || !"ADMIN".equalsIgnoreCase(currentUser.getRole())) {
 
             if (currentUser != null) {
-                // Audit Log එකට සටහන් කිරීම
+     
                 AuditLogger.log(
                         currentUser.getUsername(),
                         currentUser.getRole(),
@@ -52,12 +50,10 @@ public class AdminAuthFilter implements Filter {
                 );
             }
 
-            // Doctor ව නැවත Doctor Dashboard එකට හරවා යැවීම
             res.sendRedirect(req.getContextPath() + "/doctor-dashboard.jsp?error=unauthorized");
             return;
         }
 
-        // ADMIN නම් පමණක් Edit/Delete කිරීමට ඉඩ දීම
         chain.doFilter(request, response);
     }
 
