@@ -2,54 +2,51 @@ package com.medicare.dao.impl;
 
 import com.medicare.dao.UserDAO;
 import com.medicare.model.User;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
+public class UserDAOFileImpl extends AbstractFileDAO<User> implements UserDAO {
+  public UserDAOFileImpl() {
+    super("users.txt", User.class, "id", "username", "password", "role", "name", "email");
+  }
 
-public class UserDAOFileImpl implements UserDAO {
+  public User validateUser(String name, String password) {
+    User u = getUserByUsername(name);
+    return u != null && com.medicare.util.Passwords.verify(password, u.getPassword()) ? u : null;
+  }
 
-    @Override
-    public User validateUser(String username, String password) {
-        if ("admin".equals(username) && "admin123".equals(password)) {
-            return new User("admin", "admin123", "ADMIN");
-        } else if ("dr_perera".equals(username) && "doc123".equals(password)) {
-            return new User("dr_perera", "doc123", "DOCTOR");
-        }
-        return null;
+  public User authenticateUser(String n, String p) {
+    return validateUser(n, p);
+  }
+
+  public User getUserByUsername(String name) {
+    return find(u -> u.getUsername().equalsIgnoreCase(name));
+  }
+
+  public User getUserById(int id) {
+    return find(u -> u.getId() == id);
+  }
+
+  public List<User> getAllUsers() {
+    return readAll();
+  }
+
+  public boolean addUser(User u) {
+    synchronized (LOCK) {
+      if (getUserByUsername(u.getUsername()) != null) return false;
+      if (!com.medicare.util.Passwords.encoded(u.getPassword()))
+        u.setPassword(com.medicare.util.Passwords.hash(u.getPassword()));
+      u.setId(readAll().stream().mapToInt(User::getId).max().orElse(0) + 1);
+      return insert(u);
     }
+  }
 
-    @Override
-    public User authenticateUser(String username, String password) {
-        return validateUser(username, password);
-    }
+  public boolean updateUser(User u) {
+    if (!com.medicare.util.Passwords.encoded(u.getPassword()))
+      u.setPassword(com.medicare.util.Passwords.hash(u.getPassword()));
+    return replace(u, x -> x.getUsername().equalsIgnoreCase(u.getUsername()));
+  }
 
-    @Override
-    public User getUserByUsername(String username) {
-        return null;
-    }
-
-    @Override
-    public User getUserById(int id) {
-        return null;
-    }
-
-    @Override
-    public boolean addUser(User user) {
-        return true;
-    }
-
-    @Override
-    public boolean updateUser(User user) {
-        return true;
-    }
-
-    @Override
-    public boolean deleteUser(int id) {
-        return true;
-    }
-
-    @Override
-    public List<User> getAllUsers() {
-        return new ArrayList<>();
-    }
+  public boolean deleteUser(int id) {
+    return remove(u -> u.getId() == id);
+  }
 }

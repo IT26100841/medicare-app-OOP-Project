@@ -1,0 +1,2 @@
+<%@ page pageEncoding="UTF-8" %>
+<% if(request.getParameter("error")!=null){ %><div class="container py-2"><div class="alert alert-danger" role="alert">The operation was not completed. Check your details and try again. Error: <%= com.medicare.util.Html.escape(request.getParameter("error")) %></div></div><% } %>

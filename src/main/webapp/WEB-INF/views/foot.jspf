@@ -1,0 +1,2 @@
+<%@ page pageEncoding="UTF-8" %>
+</main><footer class="app-footer"><span>Medicare · A calmer way to manage care.</span><span>Clinic workspace · <%= LocalDate.now().getYear() %></span></footer></div><dialog id="confirm-dialog"><form method="dialog"><div class="empty-icon"><%= UI.icon("file") %></div><h2 id="confirm-title">Confirm action</h2><p id="confirm-message">Please confirm this change.</p><div class="form-actions"><button class="button" value="cancel">Keep record</button><button class="button danger" value="confirm">Confirm</button></div></form></dialog></body></html>
