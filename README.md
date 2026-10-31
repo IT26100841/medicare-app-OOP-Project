@@ -68,10 +68,6 @@ medicare-app/
 ├── pom.xml                      Maven build (war)
 ├── medicare_db.sql              Full schema + seed data
 ├── mvnw / mvnw.cmd              Maven wrapper
-├── docs/
-│   ├── TEAM-TASKS.md            Who owns which module and files
-│   ├── GIT-WORKFLOW.md          Step-by-step Git/GitHub guide
-│   └── tasks/                   Per-member task reports
 ├── src/main/java/com/medicare/  Java sources
 ├── src/main/webapp/             JSP views + WEB-INF/web.xml
 └── src/test/                    Tests
@@ -153,25 +149,3 @@ start Tomcat, then open <http://localhost:8080/medicare-app/>.
 | Insurance | Claims management |
 | Documents | Lab reports and scans — upload and view |
 | Notifications | In-app patient/staff notifications |
-
-## Team and task allocation
-
-> Replace the placeholders in the table below with the real names and GitHub
-> usernames. The same data is kept in [`docs/TEAM-TASKS.md`](docs/TEAM-TASKS.md).
-
-| # | Member | GitHub | Module | Branch |
-| --- | --- | --- | --- | --- |
-| 1 | Member 1 | `@username` | Core, authentication, security & audit | `feature/1-core-auth` |
-| 2 | Member 2 | `@username` | Patient management | `feature/2-patients` |
-| 3 | Member 3 | `@username` | Doctor management | `feature/3-doctors` |
-| 4 | Member 4 | `@username` | Appointment scheduling & conflict detection | `feature/4-appointments` |
-| 5 | Member 5 | `@username` | Medical records, prescriptions, documents | `feature/5-records` |
-| 6 | Member 6 | `@username` | Billing, insurance & pharmacy | `feature/6-billing` |
-
-## Documentation
-
-| Document | Purpose |
-| --- | --- |
-| [`docs/TEAM-TASKS.md`](docs/TEAM-TASKS.md) | Exact file ownership per member |
-| [`docs/GIT-WORKFLOW.md`](docs/GIT-WORKFLOW.md) | How each member commits and opens a pull request |
-| [`docs/tasks/TEMPLATE.md`](docs/tasks/TEMPLATE.md) | Template for each member's task report |
