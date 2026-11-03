@@ -1,0 +1,2 @@
+#medicare-tsv-v1	logId	username	userRole	action	ipAddress	timestamp
+1	admin	ADMIN	Illustrative demo workspace initialized	127.0.0.1	2026-10-28 03:30:14.356117251

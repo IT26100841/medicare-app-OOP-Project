@@ -1,0 +1,4 @@
+#medicare-tsv-v1	id	name	specialization	qualification	phone	email	consultationFee
+D001	Demo Doctor	General Medicine	MBBS	0700000001	doctor@example.com	2500.0
+D002	Dr. Anjali Perera	Family Medicine	MBBS	0700000102	anjali@example.com	3000.0
+D003	Dr. Dilan Fernando	Internal Medicine	MBBS, MD	0700000103	dilan@example.com	3500.0
