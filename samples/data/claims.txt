@@ -1,0 +1,2 @@
+#medicare-tsv-v1	claimId	patientId	providerName	policyNumber	claimAmount	status	createdAt
+1	P002	Demo Insurance	SAMPLE-001	1500.0	Pending	2026-10-28 03:30:14.358362877

@@ -1,45 +1,7 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.medicare.model.Patient" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>View Patient Details</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<div class="container mt-5">
-    <% Patient p = (Patient) request.getAttribute("patient"); if (p != null) { %>
-    <div class="card shadow">
-        <div class="card-header bg-info text-white">
-            <h4>Patient Details (ID: <%= p.getId() %>)</h4>
-        </div>
-        <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-6"><strong>Full Name:</strong> <%= p.getName() %></div>
-                <div class="col-md-6"><strong>Email:</strong> <%= p.getEmail() %></div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-4"><strong>Age:</strong> <%= p.getAge() %></div>
-                <div class="col-md-4"><strong>Gender:</strong> <%= p.getGender() %></div>
-                <div class="col-md-4"><strong>Phone:</strong> <%= p.getPhone() %></div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-8"><strong>Address:</strong> <%= p.getAddress() %></div>
-                <div class="col-md-4"><strong>Blood Group:</strong> <%= p.getBloodGroup() %></div>
-            </div>
-            <div class="mb-3">
-                <strong>Allergies:</strong> <%= p.getAllergies() %>
-            </div>
-            <div class="mb-3">
-                <strong>Medical History:</strong> <%= p.getMedicalHistory() %>
-            </div>
-            <a href="patient?action=list" class="btn btn-secondary">Back to List</a>
-            <a href="patient?action=edit&id=<%= p.getId() %>" class="btn btn-warning">Edit Details</a>
-        </div>
-    </div>
-    <% } else { %>
-        <p class="text-danger">Patient not found.</p>
-    <% } %>
-</div>
-</body>
-</html>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="com.medicare.model.*,com.medicare.service.*,com.medicare.factory.DAOFactory,com.medicare.util.*,java.util.*,java.time.*" %>
+<% request.setAttribute("pageTitle","Patient profile");request.setAttribute("nav","patients"); %>
+<%@ include file="/WEB-INF/views/head.jspf" %>
+<% Patient p=(Patient)request.getAttribute("patient");if(p==null&&request.getParameter("id")!=null)p=DAOFactory.getPatientDAO().getPatientById(request.getParameter("id"));if(p==null)throw new IllegalArgumentException("Patient not found");List<Appointment> visits=UI.visibleAppointments(viewer);final String patientKey=p.getId();visits.removeIf(a->!a.getPatientId().equals(patientKey)); %>
+<div class="page-heading"><div><div class="eyebrow">PATIENT DIRECTORY</div><h1>Patient profile</h1><p>A connected view of the patient’s information and visits.</p></div><div class="heading-actions"><a class="button" href="patient-list.jsp">Back to patients</a></div></div><div class="form-grid"><div><section class="panel"><div class="profile-head"><span class="avatar"><%= UI.e(UI.initials(p.getName())) %></span><div><div class="card-number">PATIENT · <%= UI.e(p.getId()) %></div><h2><%= UI.e(p.getName()) %></h2><p><%= p.getAge() %> years · <%= UI.e(p.getGender()) %> · Blood group <%= UI.e(p.getBloodGroup()) %></p></div></div><div class="panel-section"><h3>Contact details</h3><dl class="detail-grid"><div><dt>Phone</dt><dd><%= UI.e(p.getContact()) %></dd></div><div><dt>Email</dt><dd><%= UI.e(p.getEmail()) %></dd></div><div><dt>Address</dt><dd><%= UI.e(p.getAddress()) %></dd></div></dl></div><div class="panel-section"><h3>Clinical background</h3><dl class="detail-grid"><div><dt>Known allergies</dt><dd><%= UI.e(p.getAllergies()) %></dd></div><div style="grid-column:span 2"><dt>Medical history</dt><dd><%= UI.e(p.getMedicalHistory()) %></dd></div></dl></div></section><section class="panel"><div class="panel-head"><h2>Visit history <span class="count"><%= visits.size() %></span></h2></div><div class="table-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Date & time</th><th>Status</th><th>Next step</th></tr></thead><tbody><%@ include file="/WEB-INF/views/visit-rows.jspf" %></tbody></table></div><% if(visits.isEmpty()){ %><div class="empty-state"><div class="empty-icon"><%= UI.icon("file") %></div><h3>No visits yet.</h3><p>Book the first appointment for this patient.</p></div><% } %></section></div><aside><section class="panel"><div class="panel-head"><h2>Patient actions</h2></div><div class="panel-body stack"><% if(isReception){ %><a class="button primary" href="appointment?action=new&patientId=<%= java.net.URLEncoder.encode(p.getId(),"UTF-8") %>"><%= UI.icon("calendar") %>Book appointment</a><a class="button" href="edit-patient?id=<%= java.net.URLEncoder.encode(p.getId(),"UTF-8") %>">Edit patient details</a><% } %><a class="button" href="patient-documents.jsp?patientId=<%= java.net.URLEncoder.encode(p.getId(),"UTF-8") %>">View documents</a></div></section><div class="tip"><h3>Before you begin</h3><p>Confirm identity using the patient’s name and contact details before recording care.</p></div></aside></div>
+<%@ include file="/WEB-INF/views/foot.jspf" %>
