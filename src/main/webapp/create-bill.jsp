@@ -1,41 +1,7 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Bill</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="container mt-4">
-    <h2>Create New Bill</h2>
-    <form action="bill" method="post" class="mt-3" style="max-width: 500px;">
-        <div class="mb-3">
-            <label>Appointment ID</label>
-            <input type="number" name="appointmentId" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label>Patient ID</label>
-            <input type="text" name="patientId" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label>Amount ($)</label>
-            <input type="number" step="0.01" name="amount" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label>Payment Method</label>
-            <select name="paymentMethod" class="form-select">
-                <option value="Cash">Cash</option>
-                <option value="Card">Card</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label>Payment Status</label>
-            <select name="paymentStatus" class="form-select">
-                <option value="Unpaid">Unpaid</option>
-                <option value="Paid">Paid</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Generate Bill</button>
-        <a href="bill-list.jsp" class="btn btn-secondary">Cancel</a>
-    </form>
-</body>
-</html>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="com.medicare.model.*,com.medicare.service.*,com.medicare.factory.DAOFactory,com.medicare.util.*,java.util.*,java.time.*" %>
+<% request.setAttribute("pageTitle","Create invoice");request.setAttribute("nav","billing"); %>
+<%@ include file="/WEB-INF/views/head.jspf" %>
+<% List<Appointment> eligible=DAOFactory.getAppointmentDAO().getAllAppointments();Set<Integer> invoiced=new HashSet<>();for(Bill b:DAOFactory.getBillDAO().getAllBills())invoiced.add(b.getAppointmentId());eligible.removeIf(a->!"Completed".equals(a.getStatus())||invoiced.contains(a.getAppointmentId())); %>
+<div class="page-heading"><div><div class="eyebrow">CLINIC FINANCES</div><h1>Create a consultation invoice.</h1><p>Fees come from the doctor profile. Each visit can have one invoice.</p></div><div class="heading-actions"><a class="button" href="bill-list.jsp">Back to billing</a></div></div><form action="bill" method="post"><div class="form-grid"><section class="panel"><input type="hidden" name="csrfToken" value="<%= UI.e(session.getAttribute("csrfToken")) %>"><div class="panel-section"><h3>Completed consultation</h3><div class="field"><label for="appointmentId">Choose a completed visit <span>*</span></label><select name="appointmentId" id="appointmentId" data-invoice-select required><option value="">Select a visit to invoice</option><% for(Appointment a:eligible){Doctor d=DAOFactory.getDoctorDAO().getDoctorById(a.getDoctorId()); %><option value="<%= a.getAppointmentId() %>" <%= String.valueOf(a.getAppointmentId()).equals(request.getParameter("appointmentId"))?"selected":"" %> data-patient="<%= UI.e(a.getPatientName()) %>" data-doctor="<%= UI.e(a.getDoctorName()) %>" data-amount="<%= UI.money(d.getConsultationFee()) %>">Visit #<%= a.getAppointmentId() %> · <%= UI.e(a.getPatientName()) %> · <%= UI.e(UI.date(a.getAppointmentDate())) %></option><% } %></select><span class="help">Only completed visits without an invoice are shown.</span></div><% if(eligible.isEmpty()){ %><div class="notice info mt-20">No completed visits are ready for billing. Complete a consultation from Appointments first.</div><% } %></div><div class="panel-section"><h3>Invoice preview</h3><dl class="detail-grid"><div><dt>Patient</dt><dd data-invoice-patient>Select a visit</dd></div><div><dt>Doctor</dt><dd data-invoice-doctor>—</dd></div></dl><div class="amount-summary"><span>Consultation total</span><strong data-invoice-amount>LKR 0.00</strong></div><p class="help">The fee is calculated again on the server when saved. The invoice starts as unpaid.</p></div><div class="form-actions"><a class="button" href="bill-list.jsp">Cancel</a><button class="button primary" <%= eligible.isEmpty()?"disabled":"" %>>Create invoice</button></div></section><aside><div class="tip"><h3>Record payment after collection.</h3><p>Creating an invoice does not mark it as paid. Choose the payment method and record the full payment from Billing & payments.</p></div></aside></div></form>
+<%@ include file="/WEB-INF/views/foot.jspf" %>
