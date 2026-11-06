@@ -16,6 +16,25 @@ public class UserServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     String action = req.getParameter("action");
+    if ("export".equals(action)) {
+      res.setContentType("text/csv; charset=UTF-8");
+      res.setHeader("Content-Disposition", "attachment; filename=\"medicare_users.csv\"");
+      try (PrintWriter out = res.getWriter()) {
+        out.println("ID,Username,Role,Name,Email,Display Name");
+        for (User u : service.getAllUsers()) {
+          out.println(
+              String.format(
+                  "%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"",
+                  u.getId(),
+                  u.getUsername() == null ? "" : u.getUsername(),
+                  u.getRole() == null ? "" : u.getRole(),
+                  u.getName() == null ? "" : u.getName(),
+                  u.getEmail() == null ? "" : u.getEmail(),
+                  u.getDisplayName() == null ? "" : u.getDisplayName()));
+        }
+      }
+      return;
+    }
     if ("new".equals(action) || "edit".equals(action)) {
       if ("edit".equals(action)) {
         User user = service.getUserById(Integer.parseInt(req.getParameter("id")));
