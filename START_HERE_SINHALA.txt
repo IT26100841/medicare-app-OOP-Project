@@ -1,0 +1,75 @@
+MEDICARE — CORRECTED PROJECT / නිවැරදි කළ project එක
+
+මුලින් මේ file එක කියවන්න. Database එක මකන්න හෝ records clear කරන්න අවශ්‍ය නැහැ.
+
+DATABASE එක භාවිත කරන ක්‍රම දෙකෙන් එකක් පමණක් තෝරන්න:
+
+A. දැන් භාවිත කරන medicare_db එක දිගටම භාවිත කරනවා නම් (පහසුම ක්‍රමය)
+1. MySQL/phpMyAdmin/Workbench එකෙන් මුලින් backup export එකක් ගන්න.
+2. Tomcat Stop කරන්න.
+3. database/upgrade-reviewed.sql open කර සම්පූර්ණ script එක Execute කරන්න.
+   දැනට තිබෙන database එකේ නම medicare_db නොවේ නම් USE line එක පමණක් ඔබේ නමට වෙනස් කරන්න.
+4. අලුත් dist/medicare-app.war deploy කරන්න. දැනට තිබෙන DB VM options ඒ විදිහටම තබන්න.
+5. Tomcat Restart කර Ctrl+F5 ඔබන්න.
+
+B. ලබාදුන් updated database copy එක වෙනම import කරනවා නම්
+1. medicare_database_updated.sql (ZIP එකේ database/medicare-database-updated.sql) import කරන්න.
+2. මේක medicare_db_updated කියලා වෙනම database එකක් හදනවා.
+3. ඔයා දාපු export එකේ patient/doctor/appointment/accounts ඇතුළු INSERT data වෙනස් කරලා නැහැ.
+4. IntelliJ → Run → Edit Configurations → Tomcat → VM options:
+
+-Dmedicare.storage=DB
+-Dmedicare.db.url=jdbc:mysql://localhost:3306/medicare_db_updated
+-Dmedicare.db.user=root
+-Dmedicare.db.password=YOUR_MYSQL_PASSWORD
+
+YOUR_MYSQL_PASSWORD වෙනුවට ඔයාගේ password එක දාන්න. Password එකක් නැත්නම් අවසාන option එක නොදා ඉන්න.
+DB user root නෙවෙයි නම් ඔයාගේ DB user එක දාන්න. Port 3306 නෙවෙයි නම් URL එකේ port එක වෙනස් කරන්න.
+A ක්‍රමය භාවිත කළා නම් URL එකේ medicare_db භාවිත කරන්න; medicare_db_updated නෙවෙයි.
+
+වැදගත්: Full updated SQL එක දැනට tables තියෙන database එකකට import කරන්න එපා.
+මේක පරණ tables DROP කරන්නේ නැහැ; ඒ නිසා එකම full import එක දෙවරක් කිරීමේදී tables already exist error ලැබීම සාමාන්‍යයි.
+Existing database එකට upgrade-reviewed.sql භාවිත කරන්න. Upgrade එක repeat කළ හැකි ලෙස සකස් කර පරීක්ෂා කර ඇත.
+SQL upgrade එකට ALTER / CREATE ROUTINE permissions අවශ්‍යයි; local administrator connection එකෙන් run කරන්න.
+
+INTELLIJ / TOMCAT
+- JDK 11 හෝ වැඩි version එකක්; Apache Tomcat 9.
+- Tomcat 10/11 මේ javax.servlet project එකට ගැළපෙන්නේ නැහැ.
+- IntelliJ එකේ medicare-app/pom.xml open කර Maven project එක ලෙස load කරන්න.
+- Maven clean package → target/medicare-app.war; build නොකර run කරන්න dist/medicare-app.war තිබෙනවා.
+- Tomcat Deployment context එක /medicare-app තෝරන්න.
+- Patient: http://localhost:8080/medicare-app/portal
+- Team: http://localhost:8080/medicare-app/login.jsp
+- VM options දාන්නේ Tomcat run configuration එකටයි, Maven runner එකට පමණක් නෙවෙයි.
+
+LOGIN
+- Updated export එකේ තිබුණු accounts සහ password hashes එලෙසම තබා ඇත. දැනට භාවිත කරන logins භාවිත කරන්න.
+- ඔබේ existing DB accounts වලට අලුත් password එකක් මෙයින් assign කරන්නේ නැහැ.
+- FILE demo හෝ empty-demo SQL පමණක්: admin/admin123, staff/staff123, doctor/doc123.
+- Patient account එක Patient Portal → Create account හරහා හදාගන්න.
+- Real clinic use/public deployment සඳහා demo passwords වෙනස් කළ යුතුයි.
+
+FILE MODE
+- -Dmedicare.storage=FILE මඟින් DB නැතිව run කළ හැක.
+- පැරණි external medicare-data directory එක backup කර එයම භාවිත කරන්න.
+- FILE සහ DB යනු වෙනම datasets දෙකකි; mode switch කිරීම data migration එකක් නොවේ.
+- පරණ bills.txt format එක කියවීමට support ඇත. ඊළඟ update එකේ extended format එකට ලියනවා.
+- Extended file format එක ලියූ පසුව පරණ WAR එකට ආපසු යනවා නම් backup restore කළ යුතුයි.
+
+නිවැරදි කළ දේවල්
+- Uppercase action හරහා patient delete කිරීමේ bypass එක වැසුවා; actual delete POST + admin role + CSRF සමඟයි.
+- Role/password වෙනස් කළ හෝ delete කළ userගේ පැරණි session එක ඊළඟ management request එකේ revoke වෙනවා.
+- අතීත දිනයකට appointment reschedule කිරීම reject වෙනවා.
+- User account සහ doctor link එක එකට save/rollback වෙනවා.
+- Booking confirmation සහ cancellation notifications save වෙනවා; patientට තමන්ගේ notifications පමණක් පේනවා.
+- Doctor fee + hospital charge + medical treatment charge preview, saved invoice සහ print/PDF එකට සම්බන්ධයි.
+- Duplicate invoices සහ invalid doctor links සඳහා database constraints එකතු කළා.
+- Report සහ class diagrams මේ version එකට යාවත්කාලීන කළා.
+
+හොඳින් run වෙනවාද බලන්න
+Patient register → doctor/date/time තෝරලා book → patient notification → reception check-in (appointment day එකේ) → mapped doctor Start visit → clinical note save → Complete → invoice charges → Record payment → Print invoice.
+Doctor availability දාන්නේ Clinic doctor schedules UI එකෙන්; active table එක clinic_availability. doctor_availability legacy table එක migrate/delete කරලා නැහැ.
+
+TEST RESULTS: docs/TEST_RESULTS.md
+TEAM / GITHUB: docs/TEAM_CONTRIBUTIONS.md
+සැබෑ member names/IDs, repository URL සහ member commit evidence ඔබලා පුරවන්න ඕන. ඒවා අනුමාන කරලා හෝ fabricate කරලා නැහැ.

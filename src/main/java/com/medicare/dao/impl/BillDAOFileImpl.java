@@ -14,7 +14,10 @@ public class BillDAOFileImpl extends AbstractFileDAO<Bill> implements BillDAO {
         "patientId",
         "amount",
         "paymentMethod",
-        "paymentStatus");
+        "paymentStatus",
+        "consultationCharge",
+        "hospitalCharge",
+        "treatmentCharge");
   }
 
   public List<Bill> getAllBills() {

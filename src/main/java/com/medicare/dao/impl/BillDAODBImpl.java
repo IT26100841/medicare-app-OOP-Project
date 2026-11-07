@@ -9,6 +9,22 @@ import java.util.List;
 
 public class BillDAODBImpl implements BillDAO {
 
+  private Bill map(ResultSet rs) throws SQLException {
+    Bill b =
+        new Bill(
+            rs.getInt("bill_id"),
+            rs.getInt("appointment_id"),
+            rs.getString("patient_id"),
+            rs.getDouble("amount"),
+            rs.getString("payment_method"),
+            rs.getString("payment_status"));
+    if (rs.getObject("consultation_charge") != null)
+      b.setConsultationCharge(rs.getDouble("consultation_charge"));
+    b.setHospitalCharge(rs.getDouble("hospital_charge"));
+    b.setTreatmentCharge(rs.getDouble("treatment_charge"));
+    return b;
+  }
+
   @Override
   public boolean createBill(Bill bill) {
     try (Connection c = DBConnection.getConnection()) {
@@ -29,14 +45,18 @@ public class BillDAODBImpl implements BillDAO {
         }
         try (PreparedStatement stmt =
             c.prepareStatement(
-                "INSERT INTO bills(appointment_id,patient_id,amount,payment_method,payment_status)"
-                    + " VALUES(?,?,?,?,?)",
+                "INSERT INTO"
+                    + " bills(appointment_id,patient_id,amount,payment_method,payment_status,consultation_charge,hospital_charge,treatment_charge)"
+                    + " VALUES(?,?,?,?,?,?,?,?)",
                 Statement.RETURN_GENERATED_KEYS)) {
           stmt.setInt(1, bill.getAppointmentId());
           stmt.setString(2, bill.getPatientId());
           stmt.setDouble(3, bill.getAmount());
           stmt.setString(4, bill.getPaymentMethod());
           stmt.setString(5, bill.getPaymentStatus());
+          stmt.setBigDecimal(6, java.math.BigDecimal.valueOf(bill.getConsultationCharge()));
+          stmt.setBigDecimal(7, java.math.BigDecimal.valueOf(bill.getHospitalCharge()));
+          stmt.setBigDecimal(8, java.math.BigDecimal.valueOf(bill.getTreatmentCharge()));
           if (stmt.executeUpdate() == 0) return false;
           try (ResultSet keys = stmt.getGeneratedKeys()) {
             if (keys.next()) bill.setBillId(keys.getInt(1));
@@ -62,14 +82,7 @@ public class BillDAODBImpl implements BillDAO {
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(sql)) {
       while (rs.next()) {
-        list.add(
-            new Bill(
-                rs.getInt("bill_id"),
-                rs.getInt("appointment_id"),
-                rs.getString("patient_id"),
-                rs.getDouble("amount"),
-                rs.getString("payment_method"),
-                rs.getString("payment_status")));
+        list.add(map(rs));
       }
     } catch (SQLException e) {
       throw new IllegalStateException("Database operation failed", e);
@@ -85,13 +98,7 @@ public class BillDAODBImpl implements BillDAO {
       stmt.setInt(1, billId);
       ResultSet rs = stmt.executeQuery();
       if (rs.next()) {
-        return new Bill(
-            rs.getInt("bill_id"),
-            rs.getInt("appointment_id"),
-            rs.getString("patient_id"),
-            rs.getDouble("amount"),
-            rs.getString("payment_method"),
-            rs.getString("payment_status"));
+        return map(rs);
       }
     } catch (SQLException e) {
       throw new IllegalStateException("Database operation failed", e);

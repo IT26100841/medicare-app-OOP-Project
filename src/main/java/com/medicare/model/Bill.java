@@ -5,6 +5,34 @@ public class Bill {
   private int appointmentId;
   private String patientId;
   private double amount;
+  private double consultationCharge = -1;
+  private double hospitalCharge;
+  private double treatmentCharge;
+
+  public double getConsultationCharge() {
+    return consultationCharge < 0 ? amount : consultationCharge;
+  }
+
+  public void setConsultationCharge(double v) {
+    consultationCharge = v;
+  }
+
+  public double getHospitalCharge() {
+    return hospitalCharge;
+  }
+
+  public void setHospitalCharge(double v) {
+    hospitalCharge = v;
+  }
+
+  public double getTreatmentCharge() {
+    return treatmentCharge;
+  }
+
+  public void setTreatmentCharge(double v) {
+    treatmentCharge = v;
+  }
+
   private String paymentMethod;
   private String paymentStatus; // Paid, Unpaid
 

@@ -20,7 +20,10 @@ public class BillServlet extends HttpServlet {
       detail = "Payment recorded for invoice #" + id;
     } else {
       com.medicare.model.Bill b =
-          service.create(Integer.parseInt(req.getParameter("appointmentId")));
+          service.create(
+              Integer.parseInt(req.getParameter("appointmentId")),
+              req.getParameter("hospitalCharge"),
+              req.getParameter("treatmentCharge"));
       detail = "Invoice created for visit #" + b.getAppointmentId();
     }
     User actor = (User) req.getSession().getAttribute("currentUser");

@@ -1,0 +1,9 @@
+The frontend is local application CSS/JavaScript/SVG and uses the system font stack.
+Runtime libraries retained from the original project (unmodified jars in the WAR):
+javax.servlet:jstl:1.2 (CDDL/GPL with exceptions; see jar notices)
+com.mysql:mysql-connector-j:8.0.33 (GPLv2 with Universal FOSS Exception)
+com.google.protobuf:protobuf-java:3.21.9 (BSD-3-Clause)
+Servlet/JSP APIs are supplied by Tomcat 9, not bundled as application libraries.
+Bundled offline test dependencies: JUnit 4.13.2 (EPL-1.0), Hamcrest Core 1.3 (BSD).
+Their original license/notice entries remain in the unmodified jars.
+Test-only Tomcat, MariaDB, Chromium and formatter installations are not shipped.
