@@ -17,17 +17,13 @@ public class DeletePatientServlet extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
-    delete(req, res);
+    doGet(req, res);
   }
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
-    response.sendError(405, "Deletion requires POST");
-  }
-
-  private void delete(HttpServletRequest request, HttpServletResponse response) throws IOException {
     HttpSession session = request.getSession(false);
     User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
 

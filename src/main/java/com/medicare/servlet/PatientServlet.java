@@ -38,11 +38,21 @@ public class PatientServlet extends HttpServlet {
       return;
     }
 
-    if ("delete".equalsIgnoreCase(action)) {
-      response.sendError(405, "Deletion requires POST");
-      return;
+    if ("delete".equalsIgnoreCase(action) && patientId != null) {
+      if (!patientService.deletePatient(patientId))
+        throw new IllegalStateException("Patient deletion failed");
+
+      // Real-Time Audit Log (Delete Action)
+      String username = (currentUser != null) ? currentUser.getUsername() : "System";
+      String role = (currentUser != null) ? currentUser.getRole() : "ADMIN";
+
+      AuditLogger.log(
+          username, role, "Deleted Patient record: " + patientId, request.getRemoteAddr());
+
+      response.sendRedirect("patient-list.jsp?status=deleted");
+    } else {
+      response.sendRedirect("patient-list.jsp");
     }
-    response.sendRedirect("patient-list.jsp");
   }
 
   @Override
@@ -55,22 +65,6 @@ public class PatientServlet extends HttpServlet {
 
     String action = request.getParameter("action");
     String id = request.getParameter("id");
-    if ("delete".equalsIgnoreCase(action)) {
-      if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
-        response.sendError(403);
-        return;
-      }
-      if (!patientService.deletePatient(id))
-        throw new IllegalArgumentException("Patient not found");
-      AuditLogger.log(
-          currentUser.getUsername(),
-          currentUser.getRole(),
-          "Deleted patient " + id,
-          request.getRemoteAddr());
-      response.sendRedirect("patient-list.jsp?status=deleted");
-      return;
-    }
-
     String name = request.getParameter("name");
     String email = request.getParameter("email");
 

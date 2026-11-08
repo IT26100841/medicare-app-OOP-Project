@@ -54,15 +54,6 @@ public class PatientService {
     for (com.medicare.model.Notification n : DAOFactory.getNotificationDAO().getAllNotifications())
       if (id.equalsIgnoreCase(n.getPatientId()))
         throw new IllegalArgumentException("Patient is referenced by a notification");
-    if ("FILE".equals(DAOFactory.getStorageMode()))
-      return com.medicare.util.FileTransactions.run(
-          () -> {
-            if (!DAOFactory.getPatientDAO().deletePatient(id)) return false;
-            new PatientPortalService().removeFileAccount(id);
-            return true;
-          },
-          "patients.txt",
-          "patient_accounts.txt");
     return DAOFactory.getPatientDAO().deletePatient(id);
   }
 }
