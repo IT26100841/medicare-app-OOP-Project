@@ -49,6 +49,13 @@ public class AppointmentService {
   }
 
   public boolean updateAppointment(Appointment appointment) {
+    if (appointment != null
+        && "Booked".equals(appointment.getStatus())
+        && !java.time.LocalDateTime.of(
+                java.time.LocalDate.parse(appointment.getAppointmentDate()),
+                java.time.LocalTime.parse(appointment.getAppointmentTime()))
+            .isAfter(java.time.LocalDateTime.now()))
+      throw new IllegalArgumentException("Rescheduled appointments must be in the future");
     if (appointment == null) return false;
     com.medicare.util.Validation.appointment(appointment);
     if (!"Cancelled".equalsIgnoreCase(appointment.getStatus())

@@ -50,6 +50,26 @@ public class AppointmentDAODBImpl implements AppointmentDAO {
           }
         }
         if (!acquired) throw new SQLException("Could not acquire appointment lock");
+        conn.setAutoCommit(false);
+        String previousStatus = null;
+        if (update)
+          try (PreparedStatement old =
+              conn.prepareStatement(
+                  "SELECT status FROM appointments WHERE appointment_id=? FOR UPDATE")) {
+            old.setInt(1, a.getAppointmentId());
+            try (ResultSet rs = old.executeQuery()) {
+              if (!rs.next()) return false;
+              previousStatus = rs.getString(1);
+            }
+          }
+
+        if (update
+            && previousStatus != null
+            && !previousStatus.equals(a.getStatus())
+            && !com.medicare.model.AppointmentStatus.parse(previousStatus)
+                .canMoveTo(com.medicare.model.AppointmentStatus.parse(a.getStatus())))
+          throw new IllegalArgumentException(
+              "This appointment changed. Reload it before changing its status.");
         if (com.medicare.model.AppointmentStatus.parse(a.getStatus()).reservesSlot()) {
           String check =
               "SELECT COUNT(*) FROM appointments WHERE (doctor_id=? OR patient_id=?) AND"
@@ -87,9 +107,15 @@ public class AppointmentDAODBImpl implements AppointmentDAO {
             try (ResultSet keys = stmt.getGeneratedKeys()) {
               if (keys.next()) a.setAppointmentId(keys.getInt(1));
             }
+          if (!update && "Booked".equals(a.getStatus()))
+            com.medicare.service.NotificationEvents.db(conn, a, "confirmed");
+          if (update && "Cancelled".equals(a.getStatus()) && !"Cancelled".equals(previousStatus))
+            com.medicare.service.NotificationEvents.db(conn, a, "cancelled");
+          conn.commit();
           return true;
         }
       } finally {
+        if (!conn.getAutoCommit()) conn.rollback();
         if (acquired)
           try (PreparedStatement stmt = conn.prepareStatement("SELECT RELEASE_LOCK(?)")) {
             stmt.setString(1, lock);
@@ -143,14 +169,56 @@ public class AppointmentDAODBImpl implements AppointmentDAO {
 
   @Override
   public boolean cancelAppointment(int appointmentId) {
-    String sql = "UPDATE appointments SET status = 'Cancelled' WHERE appointment_id = ?";
-    try (Connection conn = DBConnection.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(sql)) {
+    Appointment a = getAppointmentById(appointmentId);
+    if (a == null) return false;
+    a.setStatus("Cancelled");
+    return updateAppointment(a);
+  }
 
-      stmt.setInt(1, appointmentId);
-      return stmt.executeUpdate() > 0;
+  public boolean cancelForPatient(int id, String patient) {
+    try (Connection c = DBConnection.getConnection()) {
+      c.setAutoCommit(false);
+      try {
+        Appointment a;
+        try (PreparedStatement s =
+            c.prepareStatement("SELECT * FROM appointments WHERE appointment_id=? FOR UPDATE")) {
+          s.setInt(1, id);
+          try (ResultSet rs = s.executeQuery()) {
+            if (!rs.next() || !patient.equals(rs.getString("patient_id")))
+              throw new SecurityException("Appointment is not available to this account");
+            if (!"Booked".equals(rs.getString("status"))
+                || !java.time.LocalDateTime.of(
+                        rs.getDate("appointment_date").toLocalDate(),
+                        rs.getTime("appointment_time").toLocalTime())
+                    .isAfter(java.time.LocalDateTime.now()))
+              throw new IllegalArgumentException(
+                  "Only future booked appointments can be cancelled");
+            a =
+                new Appointment(
+                    id,
+                    patient,
+                    rs.getString("doctor_id"),
+                    rs.getDate("appointment_date").toString(),
+                    rs.getTime("appointment_time").toString(),
+                    rs.getString("reason"),
+                    "Cancelled");
+          }
+        }
+        try (PreparedStatement s =
+            c.prepareStatement(
+                "UPDATE appointments SET status='Cancelled' WHERE appointment_id=?")) {
+          s.setInt(1, id);
+          s.executeUpdate();
+        }
+        com.medicare.service.NotificationEvents.db(c, a, "cancelled");
+        c.commit();
+        return true;
+      } catch (SQLException | RuntimeException e) {
+        c.rollback();
+        throw e;
+      }
     } catch (SQLException e) {
-      throw new IllegalStateException("Database operation failed", e);
+      throw new IllegalStateException("Cancellation and notification were not saved", e);
     }
   }
 

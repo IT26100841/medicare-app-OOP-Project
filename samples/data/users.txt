@@ -1,0 +1,4 @@
+#medicare-tsv-v1	id	username	password	role	name	email
+1	admin	pbkdf2$120000$7/NWPW9+5/v2j6H3vrtygg==$AG4xFHWA7IFTkWTU8U9wsn/JF1dVbrtNUjYob6KkAVA=	ADMIN	Demo Admin	admin@example.com
+2	doctor	pbkdf2$120000$6NiFQBRQgx7UlPeDix4AJw==$MpVheaNXKMiGatctxhJjijHOTUm3isUdTPzMFTtKT4E=	DOCTOR	Demo Doctor	doctor@example.com
+3	staff	pbkdf2$120000$tU8FzeuWOEG3fKKv+17jVQ==$bmIQLsDVOmF1AqkThXw77fQQ7SHfHPr3cxR0GKFAF40=	STAFF	Demo Staff	staff@example.com

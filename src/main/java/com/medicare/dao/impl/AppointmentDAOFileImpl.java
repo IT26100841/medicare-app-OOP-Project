@@ -55,7 +55,15 @@ public class AppointmentDAOFileImpl extends AbstractFileDAO<Appointment> impleme
               a.getDoctorId(), a.getAppointmentDate(), a.getAppointmentTime(), 0)) return false;
       a.setAppointmentId(
           readAll().stream().mapToInt(Appointment::getAppointmentId).max().orElse(0) + 1);
-      return insert(a);
+      return com.medicare.util.FileTransactions.run(
+          () -> {
+            if (!insert(a)) return false;
+            if ("Booked".equals(a.getStatus()))
+              com.medicare.service.NotificationEvents.file(a, "confirmed");
+            return true;
+          },
+          "appointments.txt",
+          "notifications.txt");
     }
   }
 
@@ -77,7 +85,24 @@ public class AppointmentDAOFileImpl extends AbstractFileDAO<Appointment> impleme
               a.getAppointmentDate(),
               a.getAppointmentTime(),
               a.getAppointmentId())) return false;
-      return replace(a, x -> x.getAppointmentId() == a.getAppointmentId());
+      Appointment before = getAppointmentById(a.getAppointmentId());
+      if (before != null
+          && !before.getStatus().equals(a.getStatus())
+          && !com.medicare.model.AppointmentStatus.parse(before.getStatus())
+              .canMoveTo(com.medicare.model.AppointmentStatus.parse(a.getStatus())))
+        throw new IllegalArgumentException(
+            "This appointment changed. Reload it before changing its status.");
+      return com.medicare.util.FileTransactions.run(
+          () -> {
+            if (!replace(a, x -> x.getAppointmentId() == a.getAppointmentId())) return false;
+            if (before != null
+                && !"Cancelled".equals(before.getStatus())
+                && "Cancelled".equals(a.getStatus()))
+              com.medicare.service.NotificationEvents.file(a, "cancelled");
+            return true;
+          },
+          "appointments.txt",
+          "notifications.txt");
     }
   }
 

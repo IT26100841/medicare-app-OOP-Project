@@ -1,0 +1,3 @@
+#medicare-tsv-v1	recordId	patientId	doctorId	appointmentId	diagnosis	prescription	notes	recordDate
+1	P005	D001	4	Demonstration assessment	Sample clinical note. No treatment instruction.	Illustrative data only	2026-10-28
+2	P007	D003	6	Demonstration assessment	Sample clinical note. No treatment instruction.	Illustrative data only	2026-10-28
