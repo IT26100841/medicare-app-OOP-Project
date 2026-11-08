@@ -1,0 +1,8 @@
+#medicare-tsv-v1	appointmentId	patientId	doctorId	appointmentDate	appointmentTime	reason	status
+1	P002	D001	2026-10-28	09:00	Follow-up consultation (demo)	Booked
+2	P003	D002	2026-10-28	09:20	Follow-up consultation (demo)	Checked-in
+3	P004	D003	2026-10-28	09:40	Follow-up consultation (demo)	In consultation
+4	P005	D001	2026-10-28	10:00	Follow-up consultation (demo)	Completed
+5	P006	D002	2026-10-28	10:20	Follow-up consultation (demo)	Booked
+6	P007	D003	2026-10-28	10:40	Follow-up consultation (demo)	Completed
+7	P008	D001	2026-10-28	11:00	Follow-up consultation (demo)	Cancelled

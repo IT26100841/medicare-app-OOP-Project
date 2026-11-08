@@ -23,7 +23,6 @@ target/
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
-/dist/
 /nbdist/
 /.nb-gradle/
 build/
@@ -41,12 +40,24 @@ Thumbs.db
 Desktop.ini
 
 ### Project specific ###
-*.war
 *.log
 logs/
 uploads/
-build/
+medicare-data/
+__pycache__/
 out/
 nbactions.xml
 local.properties
+*.local.properties
+
+# Local settings and secrets
 .env
+.env.*
+!.env.example
+
+# Private database exports
+/medicare_db.sql
+/medicare_db*.sql
+/database/original_snapshot.sql
+/database/private/
+/database/medicare-database-updated.sql

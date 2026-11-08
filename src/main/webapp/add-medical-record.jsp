@@ -1,43 +1,7 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Medical Record</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="container mt-4">
-    <h2>Add New Medical Record</h2>
-    <form action="medical-record" method="post" class="mt-3" style="max-width: 600px;">
-        <div class="mb-3">
-            <label>Patient ID</label>
-            <input type="text" name="patientId" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label>Doctor ID</label>
-            <input type="text" name="doctorId" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label>Appointment ID</label>
-            <input type="number" name="appointmentId" class="form-control" value="0">
-        </div>
-        <div class="mb-3">
-            <label>Diagnosis</label>
-            <textarea name="diagnosis" class="form-control" required></textarea>
-        </div>
-        <div class="mb-3">
-            <label>Prescription</label>
-            <textarea name="prescription" class="form-control" required></textarea>
-        </div>
-        <div class="mb-3">
-            <label>Notes</label>
-            <textarea name="notes" class="form-control"></textarea>
-        </div>
-        <div class="mb-3">
-            <label>Record Date</label>
-            <input type="date" name="recordDate" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Save Medical Record</button>
-        <a href="medical-record-list.jsp" class="btn btn-secondary">Cancel</a>
-    </form>
-</body>
-</html>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="com.medicare.model.*,com.medicare.service.*,com.medicare.factory.DAOFactory,com.medicare.util.*,java.util.*,java.time.*" %>
+<% request.setAttribute("pageTitle","Clinical record");request.setAttribute("nav","records"); %>
+<%@ include file="/WEB-INF/views/head.jspf" %>
+<% MedicalRecord r=(MedicalRecord)request.getAttribute("record");boolean editing=r!=null;if(r==null)r=new MedicalRecord();if(!editing&&request.getParameter("appointmentId")!=null){Appointment visit=DAOFactory.getAppointmentDAO().getAppointmentById(Integer.parseInt(request.getParameter("appointmentId")));if(visit==null)throw new IllegalArgumentException("Visit not found");new VisitService().requireDoctor(viewer,visit.getDoctorId());r.setAppointmentId(visit.getAppointmentId());r.setPatientId(visit.getPatientId());r.setDoctorId(visit.getDoctorId());}if(r.getRecordDate()==null)r.setRecordDate(LocalDate.now().toString());List<Appointment> eligible=UI.visibleAppointments(viewer);eligible.removeIf(a->!Arrays.asList("In consultation","Completed").contains(a.getStatus())); %>
+<div class="page-heading"><div><div class="eyebrow">CLINICAL WORKSPACE</div><h1><%= editing?"Edit clinical record":"Record a consultation" %></h1><p>Clinical notes stay linked to the patient, clinician and visit.</p></div><div class="heading-actions"><a class="button" href="medical-record-list.jsp">Back to records</a></div></div><form action="medical-record" method="post"><div class="form-grid"><section class="panel"><input type="hidden" name="csrfToken" value="<%= UI.e(session.getAttribute("csrfToken")) %>"><input type="hidden" name="action" value="<%= editing?"update":"insert" %>"><input type="hidden" name="recordId" value="<%= r.getRecordId() %>"><div class="panel-section"><h3>Consultation details</h3><% if(r.getPatientId()!=null){ %><input type="hidden" name="patientId" value="<%= UI.e(r.getPatientId()) %>"><input type="hidden" name="doctorId" value="<%= UI.e(r.getDoctorId()) %>"><input type="hidden" name="appointmentId" value="<%= r.getAppointmentId() %>"><dl class="detail-grid"><div><dt>Patient</dt><dd><%= UI.e(UI.patient(r.getPatientId())) %></dd></div><div><dt>Doctor</dt><dd><%= UI.e(UI.doctor(r.getDoctorId())) %></dd></div><div><dt>Visit</dt><dd><%= r.getAppointmentId()>0?"#"+r.getAppointmentId():"Not linked" %></dd></div></dl><% Patient patient=DAOFactory.getPatientDAO().getPatientById(r.getPatientId());if(patient!=null&&patient.getAllergies()!=null&&!patient.getAllergies().isBlank()){ %><div class="notice info">Recorded allergies: <%= UI.e(patient.getAllergies()) %></div><% } %><% }else{ %><p>Select an active consultation to begin recording care.</p><div class="stack"><% for(Appointment a:eligible){ %><a class="quick-action" href="medical-record?action=new&appointmentId=<%= a.getAppointmentId() %>"><span class="action-copy"><strong><%= UI.e(a.getPatientName()) %></strong><small><%= UI.e(a.getDoctorName()) %> · <%= UI.e(UI.date(a.getAppointmentDate())) %> · Visit #<%= a.getAppointmentId() %></small></span><%= UI.icon("arrow") %></a><% }if(eligible.isEmpty()){ %><div class="notice info">No active consultations. Start a checked-in visit from the appointment queue.</div><% } %></div><% } %></div><% if(r.getPatientId()!=null){ %><div class="panel-section"><div class="form-fields"><div class="field full"><label for="diagnosis">Assessment / diagnosis <span>*</span></label><textarea id="diagnosis" name="diagnosis" required placeholder="Record your assessment"><%= UI.e(r.getDiagnosis()) %></textarea></div><div class="field full"><label for="prescription">Prescription / care instructions <span>*</span></label><textarea id="prescription" name="prescription" required placeholder="Clinician-authored instructions"><%= UI.e(r.getPrescription()) %></textarea></div><div class="field full"><label for="notes">Additional notes</label><textarea id="notes" name="notes"><%= UI.e(r.getNotes()) %></textarea></div><div class="field"><label for="recordDate">Record date <span>*</span></label><input type="date" id="recordDate" name="recordDate" value="<%= UI.e(r.getRecordDate()) %>" max="<%= LocalDate.now() %>" required></div></div></div><div class="form-actions"><a class="button" href="medical-record-list.jsp">Cancel</a><button class="button primary">Save clinical record</button></div><% } %></section><aside><div class="tip"><h3>Finish the visit after saving.</h3><p>Return to Appointments and mark the consultation complete. Reception can then create the invoice. Saving a note does not automatically complete the visit.</p></div></aside></div></form>
+<%@ include file="/WEB-INF/views/foot.jspf" %>

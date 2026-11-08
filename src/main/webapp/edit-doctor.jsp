@@ -1,65 +1,7 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.medicare.model.Doctor" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Doctor - Medicare System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<%
-    Doctor doc = (Doctor) request.getAttribute("doctor");
-%>
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <h4 class="mb-0">Edit Doctor Profile</h4>
-                </div>
-                <div class="card-body">
-                    <% if (doc != null) { %>
-                    <form action="doctor?action=update" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Doctor ID (Cannot be changed)</label>
-                            <input type="text" name="id" class="form-control" value="<%= doc.getId() %>" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" name="name" class="form-control" value="<%= doc.getName() %>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Specialization</label>
-                            <input type="text" name="specialization" class="form-control" value="<%= doc.getSpecialization() %>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Qualification</label>
-                            <input type="text" name="qualification" class="form-control" value="<%= doc.getQualification() %>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phone</label>
-                            <input type="text" name="phone" class="form-control" value="<%= doc.getPhone() %>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" value="<%= doc.getEmail() %>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Consultation Fee (LKR)</label>
-                            <input type="number" step="0.01" name="consultationFee" class="form-control" value="<%= doc.getConsultationFee() %>" required>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <a href="doctor?action=list" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-warning">Update Doctor</button>
-                        </div>
-                    </form>
-                    <% } else { %>
-                        <p class="text-danger">Doctor details not found.</p>
-                    <% } %>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-</body>
-</html>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="com.medicare.model.*,com.medicare.service.*,com.medicare.factory.DAOFactory,com.medicare.util.*,java.util.*,java.time.*" %>
+<% request.setAttribute("pageTitle","Doctor profile");request.setAttribute("nav","doctors"); %>
+<%@ include file="/WEB-INF/views/head.jspf" %>
+<% Doctor d=(Doctor)request.getAttribute("doctor");boolean editing=d!=null;if(d==null)d=new Doctor(); %>
+<div class="page-heading"><div><div class="eyebrow">CARE TEAM</div><h1><%= editing?"Edit doctor profile":"Add a doctor" %></h1><p>Keep professional details and consultation fees up to date.</p></div><div class="heading-actions"><a class="button" href="doctor?action=list">Back to doctors</a></div></div><form action="doctor" method="post"><div class="form-grid"><section class="panel"><input type="hidden" name="csrfToken" value="<%= UI.e(session.getAttribute("csrfToken")) %>"><input type="hidden" name="action" value="<%= editing?"update":"insert" %>"><div class="panel-section"><h3>Professional details</h3><div class="form-fields"><div class="field"><label for="id">Doctor ID <span>*</span></label><input name="id" id="id" value="<%= UI.e(d.getId()) %>" maxlength="20" <%= editing?"readonly":"required" %> placeholder="e.g. D002"></div><div class="field"><label for="name">Full name <span>*</span></label><input name="name" id="name" value="<%= UI.e(d.getName()) %>" maxlength="100" required placeholder="Doctor’s full name"></div><div class="field"><label for="specialization">Speciality <span>*</span></label><input name="specialization" id="specialization" value="<%= UI.e(d.getSpecialization()) %>" maxlength="100" required placeholder="e.g. General Medicine"></div><div class="field"><label for="qualification">Qualifications</label><input name="qualification" id="qualification" value="<%= UI.e(d.getQualification()) %>" maxlength="100" placeholder="e.g. MBBS"></div><div class="field"><label for="phone">Phone</label><input type="tel" name="phone" id="phone" maxlength="20" value="<%= UI.e(d.getPhone()) %>"></div><div class="field"><label for="email">Email</label><input type="email" name="email" id="email" maxlength="100" value="<%= UI.e(d.getEmail()) %>"></div><div class="field"><label for="consultationFee">Consultation fee (LKR) <span>*</span></label><input type="number" name="consultationFee" id="consultationFee" min="0" max="99999999" step="0.01" value="<%= d.getConsultationFee() %>" required></div></div></div><div class="form-actions"><a class="button" href="doctor?action=list">Cancel</a><button class="button primary">Save doctor</button></div></section><aside><div class="tip"><h3>Next: publish a schedule.</h3><p>A doctor needs published availability before reception can book an appointment. Link a doctor login under Team & access.</p></div></aside></div></form>
+<%@ include file="/WEB-INF/views/foot.jspf" %>
