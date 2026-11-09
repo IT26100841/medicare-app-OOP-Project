@@ -43,3 +43,10 @@ See GUIDELINE_MAPPING.md and TEAM_CONTRIBUTIONS.md. Each of the six component ar
 See TEST_RESULTS.md for execution evidence. Actual checks use JDK 17 targeting Java 11, Tomcat 9.0.98 and MariaDB 10.11.5 with MySQL Connector/J 8.0.33. The user's original export identifies MariaDB 10.4.32; that exact engine and their personal machine were not executed remotely. Deployment server versions here identify test conditions, not current production recommendations.
 
 No payment gateway, SMS/email delivery, automated identity recovery, AI diagnosis, laboratory integration, production clinical certification or guaranteed defect-free operation is claimed. Use fake data for demonstrations. Team member attribution and repository history must be supplied by the team.
+
+
+## Version control and individual contribution evidence
+
+The [Git commit history report](git-history/Git_Commit_History.md) records the 18 main-branch commits verified on 9 November 2026, with account attribution, dates, commit and pull request links, a member evidence table, and three screenshots. The report distinguishes module assignments from commit attribution and records the outstanding account differences and unmerged admin pull request.
+
+The evidence is also available as a [standalone HTML report](git-history/Git_Commit_History.html) and [CSV history](git-history/commit-history.csv). This is a dated evidence snapshot; subsequent repository commits are visible in the [live main history](https://github.com/IT26100841/medicare-app-OOP-Project/commits/main/).

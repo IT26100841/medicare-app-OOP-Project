@@ -31,6 +31,7 @@ Browse [all project documents](docs/) or open a guide below.
 | [Team tasks](docs/TEAM-TASKS.md) | Workload and task distribution |
 | [Team contributions](docs/TEAM_CONTRIBUTIONS.md) | Team contribution documentation |
 | [GitHub contributions](docs/GITHUB_CONTRIBUTIONS.md) | Contribution tracking guidance |
+| [Actual Git commit history](docs/git-history/Git_Commit_History.md) | Verified commits, contribution evidence, PR links, and screenshots |
 | [Git workflow](docs/GIT-WORKFLOW.md) | Branch and collaboration workflow |
 | [Test results](docs/TEST_RESULTS.md) | Supplied test report |
 | [Patient portal tests](docs/PATIENT_PORTAL_TESTS.md) | Supplied patient portal test notes |
