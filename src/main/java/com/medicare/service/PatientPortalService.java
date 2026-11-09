@@ -169,23 +169,14 @@ public class PatientPortalService {
       if (file()) {
         if (!new AppointmentService().cancelAppointment(id))
           throw new IllegalStateException("Cancellation was not saved");
-      } else
-        try (Connection c = DBConnection.getConnection();
-            PreparedStatement q =
-                c.prepareStatement(
-                    "UPDATE appointments SET status='Cancelled' WHERE appointment_id=? AND"
-                        + " patient_id=? AND status='Booked' AND"
-                        + " TIMESTAMP(appointment_date,appointment_time)>?")) {
-          q.setInt(1, id);
-          q.setString(2, patient);
-          q.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-          if (q.executeUpdate() != 1)
-            throw new IllegalArgumentException(
-                "Booking changed. Reload and contact reception if needed.");
-        } catch (SQLException e) {
-          throw new IllegalStateException("Cancellation was not saved", e);
-        }
+      } else if (!new com.medicare.dao.impl.AppointmentDAODBImpl().cancelForPatient(id, patient))
+        throw new IllegalStateException("Cancellation was not saved");
     }
+  }
+
+  public void removeFileAccount(String patient) {
+    if (!file()) throw new IllegalStateException("DB accounts use foreign-key deletion");
+    files().delete(a -> patient.equals(a.getPatientId()));
   }
 
   private void details(String name, String phone, String address) {

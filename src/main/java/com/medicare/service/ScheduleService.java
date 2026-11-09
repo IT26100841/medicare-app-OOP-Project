@@ -66,16 +66,17 @@ public class ScheduleService {
     SortedSet<String> result = new TreeSet<>();
     for (Availability a : list())
       if (a.getDoctorId().equals(doctor) && a.getDayOfWeek() == day.getDayOfWeek().getValue()) {
-        LocalTime end = LocalTime.parse(a.getEndTime());
-        for (LocalTime t = LocalTime.parse(a.getStartTime());
-            !t.plusMinutes(a.getSlotMinutes()).isAfter(end); ) {
-          if (LocalDateTime.of(day, t).isAfter(LocalDateTime.now())
+        LocalDateTime end = LocalDateTime.of(day, LocalTime.parse(a.getEndTime()));
+        for (LocalDateTime slot = LocalDateTime.of(day, LocalTime.parse(a.getStartTime()));
+            !slot.plusMinutes(a.getSlotMinutes()).isAfter(end); ) {
+          LocalTime t = slot.toLocalTime();
+          if (slot.isAfter(LocalDateTime.now())
               && !DAOFactory.getAppointmentDAO()
                   .checkDoctorConflict(doctor, date, t.toString(), exclude))
             result.add(t.format(DateTimeFormatter.ofPattern("HH:mm")));
-          LocalTime next = t.plusMinutes(a.getSlotMinutes());
-          if (!next.isAfter(t)) break;
-          t = next;
+          LocalDateTime next = slot.plusMinutes(a.getSlotMinutes());
+          if (!next.isAfter(slot)) break;
+          slot = next;
         }
       }
     return new ArrayList<>(result);
@@ -89,7 +90,7 @@ public class ScheduleService {
         LocalTime start = LocalTime.parse(a.getStartTime()), end = LocalTime.parse(a.getEndTime());
         long offset = Duration.between(start, t).toMinutes();
         if (!t.isBefore(start)
-            && !t.plusMinutes(a.getSlotMinutes()).isAfter(end)
+            && Duration.between(t, end).toMinutes() >= a.getSlotMinutes()
             && offset % a.getSlotMinutes() == 0
             && t.getSecond() == 0) return true;
       }

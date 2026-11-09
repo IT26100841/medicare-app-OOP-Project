@@ -47,9 +47,9 @@ public class PatientPortalServlet extends HttpServlet {
   }
 
   protected void doPost(HttpServletRequest r, HttpServletResponse res) throws IOException {
-    String action = param(r, "action");
-    String id = patient(r);
     try {
+      String action = param(r, "action");
+      String id = patient(r);
       if ("logout".equals(action)) {
         r.getSession().invalidate();
         res.sendRedirect("portal");
@@ -180,7 +180,8 @@ public class PatientPortalServlet extends HttpServlet {
               + " class='button' href='portal?view=register'>Create account</a>");
     else {
       o.print(
-          "<a href='portal#appointments'>My appointments</a><a href='portal#profile'>My"
+          "<a href='portal#appointments'>My appointments</a><a"
+              + " href='portal#notifications'>Notifications</a><a href='portal#profile'>My"
               + " profile</a>");
       form(o, r, "logout");
       o.print("<button class='quiet'>Sign out</button></form>");
@@ -373,6 +374,24 @@ public class PatientPortalServlet extends HttpServlet {
                   + ". Pay at the clinic. Your booking will appear in the clinic"
                   + " workspace.</p><button>Confirm appointment</button></form>");
         }
+        o.print("</section>");
+      }
+      if (p != null) {
+        o.print(
+            "<section id='notifications' class='card'><p class='eyebrow'>MY"
+                + " UPDATES</p><h2>Notifications</h2>");
+        boolean any = false;
+        for (Notification n : DAOFactory.getNotificationDAO().getAllNotifications())
+          if (id.equals(n.getPatientId())) {
+            any = true;
+            o.print(
+                "<article><p>"
+                    + e(n.getMessage())
+                    + "</p><small>"
+                    + e(n.getDate())
+                    + "</small></article>");
+          }
+        if (!any) o.print("<p class='muted'>No appointment updates yet.</p>");
         o.print("</section>");
       }
       if (p != null) {

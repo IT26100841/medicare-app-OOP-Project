@@ -35,7 +35,15 @@ public class AddPatientServlet extends HttpServlet {
       // 1. අනිවාර්ය (Required) Fields ලබා ගැනීම
       String name = request.getParameter("name");
       String ageStr = request.getParameter("age");
-      int age = (ageStr != null && !ageStr.trim().isEmpty()) ? Integer.parseInt(ageStr.trim()) : 0;
+      int age = 0;
+      if (ageStr != null && !ageStr.trim().isEmpty()) {
+        try {
+          age = Integer.parseInt(ageStr.trim());
+        } catch (NumberFormatException nfe) {
+          response.sendRedirect("add-patient.jsp?error=invalid_age");
+          return;
+        }
+      }
       String gender = request.getParameter("gender");
 
       // Phone / Contact ලබා ගැනීම

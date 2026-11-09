@@ -61,3 +61,21 @@ local.properties
 /database/original_snapshot.sql
 /database/private/
 /database/medicare-database-updated.sql
+
+# Additional local exclusions
+target/
+.idea/
+*.iml
+*.log
+medicare-data/
+__pycache__/
+
+# Local configuration and runtime artifacts
+.env
+.env.*
+!.env.example
+.vscode/
+*.class
+*.tmp
+.DS_Store
+Thumbs.db

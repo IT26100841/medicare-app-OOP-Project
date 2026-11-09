@@ -26,9 +26,14 @@ public class BillServlet extends HttpServlet {
               req.getParameter("treatmentCharge"));
       detail = "Invoice created for visit #" + b.getAppointmentId();
     }
-    User actor = (User) req.getSession().getAttribute("currentUser");
-    AuditLogger.log(actor.getUsername(), actor.getRole(), detail, req.getRemoteAddr());
-    req.getSession().setAttribute("flash", detail);
+    HttpSession session = req.getSession(false);
+    User actor = (session != null) ? (User) session.getAttribute("currentUser") : null;
+    String username = (actor != null) ? actor.getUsername() : "UNKNOWN";
+    String role = (actor != null) ? actor.getRole() : "STAFF";
+    AuditLogger.log(username, role, detail, req.getRemoteAddr());
+    if (session != null) {
+      session.setAttribute("flash", detail);
+    }
     res.sendRedirect("bill-list.jsp");
   }
 }

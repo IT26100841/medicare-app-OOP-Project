@@ -1,6 +1,9 @@
 package com.medicare.servlet;
 
 import com.medicare.model.DocumentEntry;
+import com.medicare.model.User;
+import com.medicare.model.Appointment;
+import com.medicare.factory.DAOFactory;
 import com.medicare.service.PortalData;
 import com.medicare.util.DocumentStorage;
 import java.io.*;
@@ -21,6 +24,30 @@ public class ViewDocumentServlet extends HttpServlet {
     }
     if (doc == null) {
       res.sendError(404, "Document not found");
+      return;
+    }
+    User actor = (User) req.getSession().getAttribute("currentUser");
+    if (actor == null) {
+      res.sendError(401);
+      return;
+    }
+    boolean authorized = "ADMIN".equals(actor.getRole()) || "STAFF".equals(actor.getRole());
+    if ("DOCTOR".equals(actor.getRole())) {
+      com.medicare.service.VisitService visits = new com.medicare.service.VisitService();
+      for (Appointment appointment : DAOFactory.getAppointmentDAO().getAllAppointments()) {
+        if (doc.getPatientId().equals(appointment.getPatientId())) {
+          try {
+            visits.requireDoctor(actor, appointment.getDoctorId());
+            authorized = true;
+            break;
+          } catch (SecurityException ignored) {
+            // A doctor can access documents only for a patient linked to their care.
+          }
+        }
+      }
+    }
+    if (!authorized) {
+      res.sendError(403, "You are not allowed to access this patient document");
       return;
     }
     // Older SQL imports stored a relative uploads/ prefix. Strip only that known prefix.

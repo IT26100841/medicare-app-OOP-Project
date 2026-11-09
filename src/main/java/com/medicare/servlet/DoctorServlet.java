@@ -115,7 +115,16 @@ public class DoctorServlet extends HttpServlet {
     String qualification = request.getParameter("qualification");
     String phone = request.getParameter("phone");
     String email = request.getParameter("email");
-    double consultationFee = Double.parseDouble(request.getParameter("consultationFee"));
+    double consultationFee = 0.0;
+    try {
+      String feeStr = request.getParameter("consultationFee");
+      if (feeStr != null && !feeStr.trim().isEmpty()) {
+        consultationFee = Double.parseDouble(feeStr.trim());
+      }
+    } catch (NumberFormatException e) {
+      response.sendRedirect("doctor?action=new&error=invalid_fee");
+      return;
+    }
 
     Doctor newDoctor =
         new Doctor(id, name, specialization, qualification, phone, email, consultationFee);
@@ -132,7 +141,16 @@ public class DoctorServlet extends HttpServlet {
     String qualification = request.getParameter("qualification");
     String phone = request.getParameter("phone");
     String email = request.getParameter("email");
-    double consultationFee = Double.parseDouble(request.getParameter("consultationFee"));
+    double consultationFee = 0.0;
+    try {
+      String feeStr = request.getParameter("consultationFee");
+      if (feeStr != null && !feeStr.trim().isEmpty()) {
+        consultationFee = Double.parseDouble(feeStr.trim());
+      }
+    } catch (NumberFormatException e) {
+      response.sendRedirect("doctor?action=edit&id=" + id + "&error=invalid_fee");
+      return;
+    }
 
     Doctor doctor =
         new Doctor(id, name, specialization, qualification, phone, email, consultationFee);
